@@ -29,7 +29,6 @@
             box-shadow: 0 12px 40px rgba(0, 20, 40, 0.07);
         }
 
-        /* 头部 */
         .header {
             display: flex;
             justify-content: space-between;
@@ -66,8 +65,20 @@
             font-size: 14px;
             font-weight: 500;
         }
+        .top-link {
+            color: #1a4a7a;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 4px 14px;
+            border-radius: 40px;
+            background: #eef4fc;
+            transition: 0.15s;
+        }
+        .top-link:hover {
+            background: #dce6f5;
+        }
 
-        /* 更新日志条目 */
         .log-section {
             margin-top: 24px;
         }
@@ -163,6 +174,12 @@
             font-weight: 700;
         }
 
+        .log-desc ul li.feature::before {
+            content: "✦";
+            color: #1a7a7a;
+            font-weight: 700;
+        }
+
         .tag {
             display: inline-block;
             font-size: 11px;
@@ -193,11 +210,10 @@
         }
 
         .tag.feature {
-            background: #e5edf9;
-            color: #1a4a7a;
+            background: #dcecf5;
+            color: #1a6a7a;
         }
 
-        /* 底部 */
         .footer-note {
             margin-top: 28px;
             padding-top: 18px;
@@ -263,17 +279,36 @@
 <body>
     <div class="container">
 
-        <!-- 头部 -->
+        <!-- ===== 头部 ===== -->
         <div class="header">
             <h1>
                 📋 更新日志
                 <span>暑假日程</span>
             </h1>
-            <div class="version-badge">v2.0 · 2026-07-10</div>
+            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                <a href="final.html" class="top-link">🗓️ 返回日历</a>
+                <div class="version-badge">v2.1 · 2026-07-10</div>
+            </div>
         </div>
 
-        <!-- 更新日志列表 -->
+        <!-- ===== 更新日志列表 ===== -->
         <div class="log-section">
+
+            <!-- v2.1 -->
+            <div class="log-entry">
+                <div class="log-date">2026-07-10</div>
+                <div class="log-content">
+                    <div class="log-title">🔄 顺序调整 · 作业字帖优先</div>
+                    <div class="log-desc">
+                        <ul>
+                            <li class="change"><span class="tag change">调整</span> 每日固定项顺序：作业 → 字帖 → 游戏</li>
+                            <li class="change"><span class="tag change">调整</span> 游戏时间缩短为 16:00-18:00（原14:00-16:00）</li>
+                            <li class="change"><span class="tag change">调整</span> 作业时间 14:00-15:30，字帖 15:30-16:00</li>
+                            <li class="fix"><span class="tag fix">修复</span> 所有编码日程同步更新新顺序</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
 
             <!-- v2.0 -->
             <div class="log-entry">
@@ -286,8 +321,8 @@
                             <li class="add"><span class="tag add">新增</span> 机动时间延长至 19:00-21:30</li>
                             <li class="add"><span class="tag add">新增</span> 0000（纯自由日）完整日程</li>
                             <li class="change"><span class="tag change">调整</span> 语文课结束日期：7月23日</li>
-                            <li class="change"><span class="tag change">调整</span> 所有日程统一使用 dailyBase 模板</li>
                             <li class="fix"><span class="tag fix">修复</span> 部分日期编码显示错误</li>
+                            <li class="add"><span class="tag add">新增</span> 顶部导航链接：更新日志 / 返回日历</li>
                         </ul>
                     </div>
                 </div>
@@ -373,10 +408,10 @@
 
         </div>
 
-        <!-- 底部 -->
+        <!-- ===== 底部 ===== -->
         <div class="footer-note">
-            <span>📌 当前版本：v2.0 · 2026-07-10</span>
-            <span><a href="calendar.html">← 返回日程总览</a></span>
+            <span>📌 当前版本：v2.1 · 2026-07-10</span>
+            <span><a href="final.html">← 返回日程总览</a></span>
         </div>
 
     </div>
