@@ -422,7 +422,7 @@
     <div class="header">
         <h1>🗓️ 暑假日程 <small>小升初 · 2026</small></h1>
         <div class="top-links">
-            <a href="changelog.html">📋 更新日志</a>
+            <a href="log.html">📋 更新日志</a>
             <div class="today-badge" id="todayBadge">📅 今天</div>
         </div>
     </div>
@@ -472,6 +472,7 @@
         // ============================================================
         //  1. 课程配置
         // ============================================================
+        const CHINESE_START = '2026-07-01';
         const CHINESE_END = '2026-07-23';
 
         const mathDays = ['2026-08-15', '2026-08-16', '2026-08-17', '2026-08-18'];
@@ -497,7 +498,7 @@
             const d = new Date(dateStr);
             const dayOfWeek = d.getDay();
             const isWeekday = (dayOfWeek >= 1 && dayOfWeek <= 5);
-            const hasChinese = isWeekday && dateStr <= CHINESE_END;
+            const hasChinese = isWeekday && dateStr >= CHINESE_START && dateStr <= CHINESE_END;
             if (hasChinese) code += 8;
             if (mathDays.includes(dateStr)) code += 4;
             if (englishDays.includes(dateStr)) code += 2;
@@ -510,8 +511,7 @@
         }
 
         // ============================================================
-        //  3. 通用日程模板（每天固定项）
-        //     ★ 顺序：作业 → 字帖 → 游戏
+        //  3. 通用日程模板
         // ============================================================
         const dailyBase = [
             ['07:30-08:00', '起床 & 早餐'],
@@ -528,7 +528,7 @@
         ];
 
         // ============================================================
-        //  4. 日程数据库（8种编码）
+        //  4. 日程数据库
         // ============================================================
         const scheduleDB = {
             '0000': {
@@ -691,8 +691,7 @@
                 if (code & 1) { labels.push({ text: '💻 编程', cls: 'code' }); subLabels.push('10:00'); }
 
                 if (labels.length === 0) {
-                    if (isWeekend) labels.push({ text: '☀️ 自由', cls: 'rest' });
-                    else labels.push({ text: '📚 语文', cls: 'chinese' });
+                    labels.push({ text: '☀️ 自由', cls: 'rest' });
                 }
 
                 let classes = 'day-cell';
