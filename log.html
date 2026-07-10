@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 暑假日程 · 更新日志</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #f0f5fc;
+            padding: 30px 16px 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 880px;
+            width: 100%;
+            background: white;
+            border-radius: 36px;
+            padding: 32px 30px 40px;
+            box-shadow: 0 12px 40px rgba(0, 20, 40, 0.07);
+        }
+
+        /* 头部 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+            border-bottom: 2px solid #eaf0f8;
+            padding-bottom: 16px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #0b1e33;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header h1 span {
+            font-size: 14px;
+            font-weight: 400;
+            color: #2e5a86;
+            background: #e5edf9;
+            padding: 2px 16px;
+            border-radius: 60px;
+        }
+
+        .version-badge {
+            background: #1a4a7a;
+            color: white;
+            padding: 5px 18px;
+            border-radius: 60px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* 更新日志条目 */
+        .log-section {
+            margin-top: 24px;
+        }
+
+        .log-entry {
+            display: flex;
+            gap: 20px;
+            padding: 18px 0;
+            border-bottom: 1px solid #eef3fa;
+            transition: background 0.15s;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-entry:hover {
+            background: #f8fbff;
+            margin: 0 -12px;
+            padding-left: 12px;
+            padding-right: 12px;
+            border-radius: 12px;
+        }
+
+        .log-date {
+            min-width: 90px;
+            font-weight: 700;
+            color: #1a4a7a;
+            font-size: 15px;
+            padding-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .log-content {
+            flex: 1;
+        }
+
+        .log-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0b1e33;
+            margin-bottom: 6px;
+        }
+
+        .log-desc {
+            font-size: 14px;
+            color: #2d4b70;
+            line-height: 1.6;
+        }
+
+        .log-desc ul {
+            list-style: none;
+            padding-left: 4px;
+            margin-top: 4px;
+        }
+
+        .log-desc ul li {
+            padding: 3px 0 3px 22px;
+            position: relative;
+            font-size: 14px;
+            color: #2d4b70;
+        }
+
+        .log-desc ul li::before {
+            content: "•";
+            position: absolute;
+            left: 4px;
+            color: #1a4a7a;
+            font-weight: 700;
+        }
+
+        .log-desc ul li.add::before {
+            content: "+";
+            color: #1f8a3a;
+            font-weight: 700;
+        }
+
+        .log-desc ul li.fix::before {
+            content: "✓";
+            color: #1a6bb0;
+            font-weight: 700;
+        }
+
+        .log-desc ul li.change::before {
+            content: "↻";
+            color: #b07a1a;
+            font-weight: 700;
+        }
+
+        .log-desc ul li.remove::before {
+            content: "−";
+            color: #b03a1a;
+            font-weight: 700;
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 1px 12px;
+            border-radius: 30px;
+            margin-right: 6px;
+        }
+
+        .tag.add {
+            background: #dff0e0;
+            color: #1f6a2a;
+        }
+
+        .tag.fix {
+            background: #dce8f5;
+            color: #1a5a8a;
+        }
+
+        .tag.change {
+            background: #f5eedc;
+            color: #8a6a1a;
+        }
+
+        .tag.remove {
+            background: #f5dcdc;
+            color: #8a2a1a;
+        }
+
+        .tag.feature {
+            background: #e5edf9;
+            color: #1a4a7a;
+        }
+
+        /* 底部 */
+        .footer-note {
+            margin-top: 28px;
+            padding-top: 18px;
+            border-top: 1px solid #e2ebf5;
+            font-size: 13px;
+            color: #3a6290;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .footer-note a {
+            color: #1a4a7a;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer-note a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 16px 28px;
+            }
+
+            .log-entry {
+                flex-direction: column;
+                gap: 6px;
+                padding: 14px 0;
+            }
+
+            .log-date {
+                min-width: auto;
+                font-size: 13px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .version-badge {
+                font-size: 12px;
+                padding: 3px 14px;
+            }
+
+            .log-title {
+                font-size: 15px;
+            }
+
+            .log-desc {
+                font-size: 13px;
+            }
+
+            .log-desc ul li {
+                font-size: 13px;
+                padding: 2px 0 2px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- 头部 -->
+        <div class="header">
+            <h1>
+                📋 更新日志
+                <span>暑假日程</span>
+            </h1>
+            <div class="version-badge">v2.0 · 2026-07-10</div>
+        </div>
+
+        <!-- 更新日志列表 -->
+        <div class="log-section">
+
+            <!-- v2.0 -->
+            <div class="log-entry">
+                <div class="log-date">2026-07-10</div>
+                <div class="log-content">
+                    <div class="log-title">🎉 重大更新 · 全面重构</div>
+                    <div class="log-desc">
+                        <ul>
+                            <li class="add"><span class="tag add">新增</span> 每日作业 + 字帖固定任务</li>
+                            <li class="add"><span class="tag add">新增</span> 机动时间延长至 19:00-21:30</li>
+                            <li class="add"><span class="tag add">新增</span> 0000（纯自由日）完整日程</li>
+                            <li class="change"><span class="tag change">调整</span> 语文课结束日期：7月23日</li>
+                            <li class="change"><span class="tag change">调整</span> 所有日程统一使用 dailyBase 模板</li>
+                            <li class="fix"><span class="tag fix">修复</span> 部分日期编码显示错误</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- v1.9 -->
+            <div class="log-entry">
+                <div class="log-date">2026-07-09</div>
+                <div class="log-content">
+                    <div class="log-title">📅 课程细化 · 编码完善</div>
+                    <div class="log-desc">
+                        <ul>
+                            <li class="add"><span class="tag add">新增</span> 编程课：7/29, 8/5 特殊日期</li>
+                            <li class="add"><span class="tag add">新增</span> 英语课：7/23, 7/30 特殊日期</li>
+                            <li class="change"><span class="tag change">调整</span> 编程课排除 8/16, 8/23</li>
+                            <li class="fix"><span class="tag fix">修复</span> 日历跳转链接路径</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- v1.8 -->
+            <div class="log-entry">
+                <div class="log-date">2026-07-08</div>
+                <div class="log-content">
+                    <div class="log-title">🔗 跳转功能 · 路径优化</div>
+                    <div class="log-desc">
+                        <ul>
+                            <li class="add"><span class="tag add">新增</span> 点击日期跳转到对应日程详情</li>
+                            <li class="add"><span class="tag add">新增</span> 9种编码对应日程卡片</li>
+                            <li class="change"><span class="tag change">调整</span> 文件路径为 plan/ 子目录</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- v1.5 -->
+            <div class="log-entry">
+                <div class="log-date">2026-07-07</div>
+                <div class="log-content">
+                    <div class="log-title">📊 编码系统 · 二进制映射</div>
+                    <div class="log-desc">
+                        <ul>
+                            <li class="add"><span class="tag add">新增</span> 四位二进制编码（语文8+数学4+英语2+编程1）</li>
+                            <li class="add"><span class="tag add">新增</span> 今日徽章显示编码</li>
+                            <li class="change"><span class="tag change">调整</span> 日历标签按编码自动生成</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- v1.2 -->
+            <div class="log-entry">
+                <div class="log-date">2026-07-06</div>
+                <div class="log-content">
+                    <div class="log-title">🎨 UI 美化 · 响应式设计</div>
+                    <div class="log-desc">
+                        <ul>
+                            <li class="add"><span class="tag add">新增</span> 双月并排日历（7月+8月）</li>
+                            <li class="add"><span class="tag add">新增</span> 图例说明 + 底部课程摘要</li>
+                            <li class="change"><span class="tag change">调整</span> 移动端适配优化</li>
+                            <li class="change"><span class="tag change">调整</span> 颜色方案统一</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- v1.0 -->
+            <div class="log-entry">
+                <div class="log-date">2026-07-05</div>
+                <div class="log-content">
+                    <div class="log-title">🚀 初始版本 · 基础框架</div>
+                    <div class="log-desc">
+                        <ul>
+                            <li class="add"><span class="tag add">新增</span> 日历主页面 HTML 结构</li>
+                            <li class="add"><span class="tag add">新增</span> 语文、数学、英语、编程课程配置</li>
+                            <li class="add"><span class="tag add">新增</span> 日期点击交互功能</li>
+                            <li class="add"><span class="tag add">新增</span> 今日日期高亮显示</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 底部 -->
+        <div class="footer-note">
+            <span>📌 当前版本：v2.0 · 2026-07-10</span>
+            <span><a href="calendar.html">← 返回日程总览</a></span>
+        </div>
+
+    </div>
+</body>
+</html>
