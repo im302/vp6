@@ -220,6 +220,10 @@
             background: #d4e2f8;
             color: #004080;
         }
+        .day-cell .day-label.military {
+            background: #d4c8a0;
+            color: #5a4a2a;
+        }
         .day-cell .day-label.rest {
             background: #e6edf8;
             color: #3a5f88;
@@ -371,6 +375,10 @@
             background: #d4e2f8;
             color: #004080;
         }
+        .tag-mini.military {
+            background: #d4c8a0;
+            color: #5a4a2a;
+        }
         .tag-mini.rest {
             background: #e6edf8;
             color: #3a5f88;
@@ -448,10 +456,11 @@
         <span><i style="background:#d4e8d4;"></i> 编程</span>
         <span><i style="background:#d4d4f0;"></i> 英语</span>
         <span><i style="background:#d4e2f8;"></i> 语文</span>
+        <span><i style="background:#d4c8a0;"></i> 军训</span>
         <span style="background:#eef3fc; padding:0 14px; border-radius:40px;">🔗 点击日期 → 下方日程</span>
     </div>
     <div style="text-align:center; margin-top:6px;">
-        <span class="footer-note">📚 语文 7/1-23 &nbsp;|&nbsp; 🧮 数学 8/15-18 &nbsp;|&nbsp; 💻 编程 周日 (除8/16,8/23) + 7/29,8/5 &nbsp;|&nbsp; 🇬🇧 英语 每周日 + 7/23,7/30</span>
+        <span class="footer-note">📚 语文 7/1-23 &nbsp;|&nbsp; 🧮 数学 8/15-18 &nbsp;|&nbsp; 💻 编程 周日 (除8/16,8/23) + 7/29,8/5 &nbsp;|&nbsp; 🇬🇧 英语 每周日 + 7/23,7/30 &nbsp;|&nbsp; 🎖️ 军训 8/21-25</span>
     </div>
 
     <!-- ===== 日程详情 ===== -->
@@ -490,6 +499,11 @@
             '2026-08-02', '2026-08-09', '2026-08-16', '2026-08-23', '2026-08-30'
         ];
 
+        // ★ 军训：8月21日 ~ 8月25日
+        const militaryDays = [
+            '2026-08-21', '2026-08-22', '2026-08-23', '2026-08-24', '2026-08-25'
+        ];
+
         // ============================================================
         //  2. 编码函数
         // ============================================================
@@ -499,6 +513,13 @@
             const dayOfWeek = d.getDay();
             const isWeekday = (dayOfWeek >= 1 && dayOfWeek <= 5);
             const hasChinese = isWeekday && dateStr >= CHINESE_START && dateStr <= CHINESE_END;
+
+            // ★ 军训优先：有军训时覆盖其他课程（除了数学8/15-18不重叠）
+            if (militaryDays.includes(dateStr)) {
+                // 军训日只显示军训，不加其他编码
+                return 0;
+            }
+
             if (hasChinese) code += 8;
             if (mathDays.includes(dateStr)) code += 4;
             if (englishDays.includes(dateStr)) code += 2;
@@ -508,6 +529,11 @@
 
         function getCodeStr(dateStr) {
             return getCode(dateStr).toString(2).padStart(4, '0');
+        }
+
+        // 判断是否为军训日
+        function isMilitaryDay(dateStr) {
+            return militaryDays.includes(dateStr);
         }
 
         // ============================================================
@@ -527,13 +553,29 @@
             ['22:30', '💤 熄灯睡觉']
         ];
 
+        // 军训日程
+        const militarySchedule = [
+            ['06:00-06:30', '起床 & 洗漱'],
+            ['06:30-07:00', '早操 / 晨练'],
+            ['07:00-07:30', '早餐'],
+            ['07:30-11:30', '🎖️ 军训训练 (队列/体能)'],
+            ['11:30-12:30', '午餐 & 休息'],
+            ['12:30-14:00', '😴 午休'],
+            ['14:00-17:00', '🎖️ 军训训练 (技能/演练)'],
+            ['17:00-18:00', '自由活动 / 整理内务'],
+            ['18:00-19:00', '晚餐'],
+            ['19:00-20:30', '📖 机动时间 (阅读/写心得)'],
+            ['20:30-21:30', '洗漱 & 自由活动'],
+            ['21:30', '💤 熄灯睡觉']
+        ];
+
         // ============================================================
         //  4. 日程数据库
         // ============================================================
         const scheduleDB = {
             '0000': {
                 combo: '纯自由日',
-                dates: '7/4, 7/11, 7/18, 7/24-25, 7/27-28, 7/31, 8/1, 8/3-4, 8/6-8, 8/10-14, 8/19-22, 8/24-29, 8/31',
+                dates: '7/4, 7/11, 7/18, 7/24-25, 7/27-28, 7/31, 8/1, 8/3-4, 8/6-8, 8/10-14, 8/19-20, 8/26-29, 8/31',
                 items: [
                     ...dailyBase.slice(0, 1),
                     ['08:00-12:00', '🎮 自由安排 / 休息'],
@@ -561,7 +603,7 @@
             },
             '0010': {
                 combo: '英语日',
-                dates: '7/30, 8/23',
+                dates: '7/30, 8/23 (军训覆盖)',
                 items: [
                     ...dailyBase.slice(0, 1),
                     ['08:00-12:00', '🎮 自由安排 / 休息'],
@@ -651,6 +693,12 @@
                     ['18:30-21:30', '🇬🇧 英语课', 'english'],
                     ...dailyBase.slice(8)
                 ]
+            },
+            // ★ 新增军训编码（使用 'military' 作为特殊标识）
+            'military': {
+                combo: '🎖️ 军训日',
+                dates: '8/21, 8/22, 8/23, 8/24, 8/25',
+                items: militarySchedule
             }
         };
 
@@ -681,14 +729,21 @@
 
                 const code = getCode(dateStr);
                 const codeStr = code.toString(2).padStart(4, '0');
+                const isMil = isMilitaryDay(dateStr);
 
                 let labels = [];
                 let subLabels = [];
 
-                if (code & 8) labels.push({ text: '📚 语文', cls: 'chinese' });
-                if (code & 4) { labels.push({ text: '🧮 数学', cls: 'math' }); subLabels.push('18:00'); }
-                if (code & 2) { labels.push({ text: '🇬🇧 英语', cls: 'english' }); subLabels.push('18:30'); }
-                if (code & 1) { labels.push({ text: '💻 编程', cls: 'code' }); subLabels.push('10:00'); }
+                // ★ 军训优先显示
+                if (isMil) {
+                    labels.push({ text: '🎖️ 军训', cls: 'military' });
+                    subLabels.push('全天');
+                } else {
+                    if (code & 8) labels.push({ text: '📚 语文', cls: 'chinese' });
+                    if (code & 4) { labels.push({ text: '🧮 数学', cls: 'math' }); subLabels.push('18:00'); }
+                    if (code & 2) { labels.push({ text: '🇬🇧 英语', cls: 'english' }); subLabels.push('18:30'); }
+                    if (code & 1) { labels.push({ text: '💻 编程', cls: 'code' }); subLabels.push('10:00'); }
+                }
 
                 if (labels.length === 0) {
                     labels.push({ text: '☀️ 自由', cls: 'rest' });
@@ -701,7 +756,10 @@
                 let labelHtml = labels.map(l => `<div class="day-label ${l.cls}">${l.text}</div>`).join('');
                 let subHtml = subLabels.length > 0 ? `<div class="sub-label">${subLabels.join(' ')}</div>` : '';
 
-                html += `<div class="${classes}" data-code="${codeStr}" data-date="${dateStr}" onclick="jumpToDetail('${codeStr}')">
+                // 军训日点击跳转到 military 卡片
+                const targetCode = isMil ? 'military' : codeStr;
+
+                html += `<div class="${classes}" data-code="${targetCode}" data-date="${dateStr}" onclick="jumpToDetail('${targetCode}')">
                             <div class="day-number">${d}</div>
                             ${labelHtml}
                             ${subHtml}
@@ -733,14 +791,15 @@
         // ============================================================
         function renderDetails() {
             const container = document.getElementById('detailGrid');
-            const codes = ['0000', '0001', '0010', '0011', '0100', '0110', '1000', '1010'];
+            const codes = ['0000', '0001', '0010', '0011', '0100', '0110', '1000', '1010', 'military'];
             let html = '';
             codes.forEach(code => {
                 const data = scheduleDB[code];
                 if (!data) return;
+                const isMil = code === 'military';
                 html += `<div class="detail-card" id="detail-${code}">
                             <div class="card-header">
-                                <span class="code-tag">${code}</span>
+                                <span class="code-tag">${isMil ? '🎖️' : code}</span>
                                 <span class="combo">${data.combo}</span>
                             </div>
                             <div class="date-list">📌 ${data.dates}</div>
@@ -748,7 +807,7 @@
                                 let actHtml = item[1];
                                 if (item[2]) {
                                     const cls = item[2];
-                                    const label = cls === 'chinese' ? '语文' : cls === 'math' ? '数学' : cls === 'english' ? '英语' : cls === 'code' ? '编程' : '';
+                                    const label = cls === 'chinese' ? '语文' : cls === 'math' ? '数学' : cls === 'english' ? '英语' : cls === 'code' ? '编程' : cls === 'military' ? '军训' : '';
                                     actHtml += ` <span class="tag-mini ${cls}">${label}</span>`;
                                 }
                                 return `<div class="schedule-item"><span class="stime">${item[0]}</span><span class="sact">${actHtml}</span></div>`;
@@ -766,9 +825,16 @@
             const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
             const weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
             const wd = weekdays[now.getDay() === 0 ? 6 : now.getDay() - 1];
+            const isMil = isMilitaryDay(dateStr);
             const code = getCode(dateStr);
             const codeStr = code.toString(2).padStart(4, '0');
-            document.getElementById('todayBadge').textContent = `📅 ${dateStr} ${wd} 编码: ${codeStr}`;
+            let badgeText = `📅 ${dateStr} ${wd}`;
+            if (isMil) {
+                badgeText += ' 🎖️ 军训';
+            } else {
+                badgeText += ` 编码: ${codeStr}`;
+            }
+            document.getElementById('todayBadge').textContent = badgeText;
         }
 
         // ============================================================
