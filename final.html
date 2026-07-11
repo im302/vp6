@@ -514,9 +514,8 @@
             const isWeekday = (dayOfWeek >= 1 && dayOfWeek <= 5);
             const hasChinese = isWeekday && dateStr >= CHINESE_START && dateStr <= CHINESE_END;
 
-            // ★ 军训优先：有军训时覆盖其他课程（除了数学8/15-18不重叠）
+            // ★ 军训日：不加编码，单独显示
             if (militaryDays.includes(dateStr)) {
-                // 军训日只显示军训，不加其他编码
                 return 0;
             }
 
@@ -531,7 +530,6 @@
             return getCode(dateStr).toString(2).padStart(4, '0');
         }
 
-        // 判断是否为军训日
         function isMilitaryDay(dateStr) {
             return militaryDays.includes(dateStr);
         }
@@ -551,22 +549,6 @@
             ['19:00-21:30', '📖 机动时间 (阅读/预习/补作业)'],
             ['21:30-22:30', '洗漱准备睡'],
             ['22:30', '💤 熄灯睡觉']
-        ];
-
-        // 军训日程
-        const militarySchedule = [
-            ['06:00-06:30', '起床 & 洗漱'],
-            ['06:30-07:00', '早操 / 晨练'],
-            ['07:00-07:30', '早餐'],
-            ['07:30-11:30', '🎖️ 军训训练 (队列/体能)'],
-            ['11:30-12:30', '午餐 & 休息'],
-            ['12:30-14:00', '😴 午休'],
-            ['14:00-17:00', '🎖️ 军训训练 (技能/演练)'],
-            ['17:00-18:00', '自由活动 / 整理内务'],
-            ['18:00-19:00', '晚餐'],
-            ['19:00-20:30', '📖 机动时间 (阅读/写心得)'],
-            ['20:30-21:30', '洗漱 & 自由活动'],
-            ['21:30', '💤 熄灯睡觉']
         ];
 
         // ============================================================
@@ -693,12 +675,6 @@
                     ['18:30-21:30', '🇬🇧 英语课', 'english'],
                     ...dailyBase.slice(8)
                 ]
-            },
-            // ★ 新增军训编码（使用 'military' 作为特殊标识）
-            'military': {
-                combo: '🎖️ 军训日',
-                dates: '8/21, 8/22, 8/23, 8/24, 8/25',
-                items: militarySchedule
             }
         };
 
@@ -734,10 +710,8 @@
                 let labels = [];
                 let subLabels = [];
 
-                // ★ 军训优先显示
                 if (isMil) {
                     labels.push({ text: '🎖️ 军训', cls: 'military' });
-                    subLabels.push('全天');
                 } else {
                     if (code & 8) labels.push({ text: '📚 语文', cls: 'chinese' });
                     if (code & 4) { labels.push({ text: '🧮 数学', cls: 'math' }); subLabels.push('18:00'); }
@@ -756,8 +730,8 @@
                 let labelHtml = labels.map(l => `<div class="day-label ${l.cls}">${l.text}</div>`).join('');
                 let subHtml = subLabels.length > 0 ? `<div class="sub-label">${subLabels.join(' ')}</div>` : '';
 
-                // 军训日点击跳转到 military 卡片
-                const targetCode = isMil ? 'military' : codeStr;
+                // 军训日固定跳转到 0000 日程卡片（显示自由日日程）
+                const targetCode = isMil ? '0000' : codeStr;
 
                 html += `<div class="${classes}" data-code="${targetCode}" data-date="${dateStr}" onclick="jumpToDetail('${targetCode}')">
                             <div class="day-number">${d}</div>
@@ -791,15 +765,14 @@
         // ============================================================
         function renderDetails() {
             const container = document.getElementById('detailGrid');
-            const codes = ['0000', '0001', '0010', '0011', '0100', '0110', '1000', '1010', 'military'];
+            const codes = ['0000', '0001', '0010', '0011', '0100', '0110', '1000', '1010'];
             let html = '';
             codes.forEach(code => {
                 const data = scheduleDB[code];
                 if (!data) return;
-                const isMil = code === 'military';
                 html += `<div class="detail-card" id="detail-${code}">
                             <div class="card-header">
-                                <span class="code-tag">${isMil ? '🎖️' : code}</span>
+                                <span class="code-tag">${code}</span>
                                 <span class="combo">${data.combo}</span>
                             </div>
                             <div class="date-list">📌 ${data.dates}</div>
@@ -807,7 +780,7 @@
                                 let actHtml = item[1];
                                 if (item[2]) {
                                     const cls = item[2];
-                                    const label = cls === 'chinese' ? '语文' : cls === 'math' ? '数学' : cls === 'english' ? '英语' : cls === 'code' ? '编程' : cls === 'military' ? '军训' : '';
+                                    const label = cls === 'chinese' ? '语文' : cls === 'math' ? '数学' : cls === 'english' ? '英语' : cls === 'code' ? '编程' : '';
                                     actHtml += ` <span class="tag-mini ${cls}">${label}</span>`;
                                 }
                                 return `<div class="schedule-item"><span class="stime">${item[0]}</span><span class="sact">${actHtml}</span></div>`;
