@@ -407,6 +407,86 @@
             transition: background 0.3s, box-shadow 0.3s;
         }
 
+        /* 动态状态条 */
+        .status-bar {
+            background: #e8f0fa;
+            border-radius: 60px;
+            padding: 10px 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+            border: 1px solid #d4e2f2;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            width: 100%;
+        }
+        .status-bar .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 20px;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .status-bar .dot.green {
+            background: #2b7e3b;
+            animation: pulse-dot 2s infinite;
+        }
+        .status-bar .dot.yellow {
+            background: #d4a030;
+            animation: pulse-dot 2s infinite;
+        }
+        .status-bar .dot.gray {
+            background: #8a9aaa;
+        }
+        @keyframes pulse-dot {
+            0% { opacity: 0.6; transform: scale(0.95); }
+            50% { opacity: 1; transform: scale(1.15); }
+            100% { opacity: 0.6; transform: scale(0.95); }
+        }
+        .status-bar .status-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: #0b2a4a;
+        }
+        .status-bar .status-activity {
+            font-weight: 700;
+            color: #003b7a;
+            background: white;
+            padding: 2px 18px;
+            border-radius: 40px;
+            border: 1px solid #b8cee6;
+            font-size: 15px;
+        }
+        .status-bar .status-time {
+            color: #3a5f88;
+            font-size: 14px;
+            margin-left: auto;
+        }
+        .status-bar .status-next {
+            font-size: 13px;
+            color: #3a6290;
+            background: #eef4fc;
+            padding: 2px 14px;
+            border-radius: 40px;
+        }
+        @media (max-width: 700px) {
+            .status-bar {
+                padding: 8px 16px;
+                gap: 10px;
+            }
+            .status-bar .status-text {
+                font-size: 13px;
+            }
+            .status-bar .status-activity {
+                font-size: 13px;
+                padding: 2px 12px;
+            }
+            .status-bar .status-time {
+                font-size: 12px;
+            }
+        }
+
         @media (max-width: 600px) {
             .detail-grid {
                 grid-template-columns: 1fr;
@@ -441,6 +521,15 @@
             <a href="log.html">📋 更新日志</a>
             <div class="today-badge" id="todayBadge">📅 今天</div>
         </div>
+    </div>
+
+    <!-- ===== 动态状态条 ===== -->
+    <div class="status-bar" id="statusBar">
+        <span class="dot green" id="statusDot"></span>
+        <span class="status-text" id="statusText">🕒 当前</span>
+        <span class="status-activity" id="statusActivity">加载中…</span>
+        <span class="status-time" id="statusTime"></span>
+        <span class="status-next" id="statusNext">⏳ 下一项：—</span>
     </div>
 
     <!-- ===== 日历 ===== -->
@@ -522,9 +611,6 @@
         const militaryDays = [
             '2026-08-21', '2026-08-22', '2026-08-23', '2026-08-24', '2026-08-25'
         ];
-
-        // ★ 运动：每天 16:00-18:00（所有日期）
-        function hasSport() { return true; }
 
         // 判断是否为新增编程课（15:00-18:00）
         function isNewCodeDay(dateStr) {
@@ -865,12 +951,161 @@
         }
 
         // ============================================================
-        //  9. 初始化
+        //  9. 动态状态条 (每分钟更新)
+        // ============================================================
+        function updateStatusBar() {
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            const isMil = isMilitaryDay(todayStr);
+            const code = getCode(todayStr);
+            const codeStr = code.toString(2).padStart(4, '0');
+
+            // 获取今天的日程列表
+            let todaySchedule = [];
+            if (isMil) {
+                // 军训日简易日程
+                todaySchedule = [
+                    ['06:00-06:30', '起床 & 洗漱'],
+                    ['06:30-07:00', '早操'],
+                    ['07:00-07:30', '早餐'],
+                    ['07:30-11:30', '🎖️ 军训训练'],
+                    ['11:30-12:30', '午餐 & 休息'],
+                    ['12:30-14:00', '午休'],
+                    ['14:00-17:00', '🎖️ 军训训练'],
+                    ['17:00-18:00', '自由活动'],
+                    ['18:00-19:00', '晚餐'],
+                    ['19:00-20:30', '机动时间'],
+                    ['20:30-21:30', '洗漱'],
+                    ['21:30', '💤 熄灯睡觉']
+                ];
+            } else {
+                const data = scheduleDB[codeStr];
+                if (data) {
+                    todaySchedule = data.items;
+                } else {
+                    todaySchedule = dailyBaseNormal;
+                }
+            }
+
+            // 解析时间并查找当前活动
+            let currentActivity = '自由时间 🎉';
+            let nextActivity = '—';
+            let found = false;
+            let nextFound = false;
+
+            for (let i = 0; i < todaySchedule.length; i++) {
+                const item = todaySchedule[i];
+                const timeStr = item[0];
+                // 解析开始时间
+                let startMin = 0;
+                if (timeStr.includes('-')) {
+                    const parts = timeStr.split('-');
+                    const startParts = parts[0].trim().split(':');
+                    if (startParts.length === 2) {
+                        startMin = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
+                    }
+                } else {
+                    // 单个时间（如 "22:30"）
+                    const parts = timeStr.trim().split(':');
+                    if (parts.length === 2) {
+                        startMin = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+                    }
+                }
+
+                if (!found && currentMinutes >= startMin) {
+                    currentActivity = item[1];
+                    found = true;
+                    // 查找下一项
+                    for (let j = i + 1; j < todaySchedule.length; j++) {
+                        const nextItem = todaySchedule[j];
+                        const nextTimeStr = nextItem[0];
+                        let nextStartMin = 0;
+                        if (nextTimeStr.includes('-')) {
+                            const nextParts = nextTimeStr.split('-');
+                            const startParts2 = nextParts[0].trim().split(':');
+                            if (startParts2.length === 2) {
+                                nextStartMin = parseInt(startParts2[0]) * 60 + parseInt(startParts2[1]);
+                            }
+                        } else {
+                            const parts2 = nextTimeStr.trim().split(':');
+                            if (parts2.length === 2) {
+                                nextStartMin = parseInt(parts2[0]) * 60 + parseInt(parts2[1]);
+                            }
+                        }
+                        if (currentMinutes < nextStartMin) {
+                            nextActivity = nextItem[1] + ' (' + nextItem[0] + ')';
+                            nextFound = true;
+                            break;
+                        }
+                    }
+                    if (!nextFound) {
+                        nextActivity = '今日结束 🎉';
+                    }
+                    break;
+                }
+            }
+
+            // 如果还没找到（可能在第一个活动之前）
+            if (!found && todaySchedule.length > 0) {
+                const firstItem = todaySchedule[0];
+                const firstTimeStr = firstItem[0];
+                let firstStartMin = 0;
+                if (firstTimeStr.includes('-')) {
+                    const parts = firstTimeStr.split('-');
+                    const startParts = parts[0].trim().split(':');
+                    if (startParts.length === 2) {
+                        firstStartMin = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
+                    }
+                } else {
+                    const parts = firstTimeStr.trim().split(':');
+                    if (parts.length === 2) {
+                        firstStartMin = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+                    }
+                }
+                if (currentMinutes < firstStartMin) {
+                    currentActivity = '还没开始今天日程 😴';
+                    nextActivity = firstItem[1] + ' (' + firstItem[0] + ')';
+                }
+            }
+
+            // 如果当前时间在 22:30 之后，显示睡觉
+            if (currentMinutes >= 22*60+30 || currentMinutes < 6*60) {
+                currentActivity = '💤 睡觉时间';
+                nextActivity = '明天继续 🌙';
+            }
+
+            // 更新UI
+            const dot = document.getElementById('statusDot');
+            const activityEl = document.getElementById('statusActivity');
+            const timeEl = document.getElementById('statusTime');
+            const nextEl = document.getElementById('statusNext');
+
+            // 根据活动类型改变点颜色
+            if (currentActivity.includes('睡觉') || currentActivity.includes('熄灯')) {
+                dot.className = 'dot gray';
+            } else if (currentActivity.includes('自由') || currentActivity.includes('还没开始')) {
+                dot.className = 'dot yellow';
+            } else {
+                dot.className = 'dot green';
+            }
+
+            const nowStr = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+            activityEl.textContent = currentActivity;
+            timeEl.textContent = '🕐 ' + nowStr;
+            nextEl.textContent = '⏳ 下一项：' + nextActivity;
+        }
+
+        // ============================================================
+        //  10. 初始化
         // ============================================================
         renderMonth(YEAR, 6, 'julyGrid');
         renderMonth(YEAR, 7, 'augustGrid');
         renderDetails();
         updateBadge();
+        updateStatusBar();
+        // 每分钟更新一次状态条
+        setInterval(updateStatusBar, 60000);
     })();
 </script>
 
